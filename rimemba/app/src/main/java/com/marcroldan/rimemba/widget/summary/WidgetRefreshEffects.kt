@@ -1,6 +1,7 @@
 package com.marcroldan.rimemba.widget.summary
 
 import android.content.Context
+import androidx.glance.appwidget.updateAll
 import com.marcroldan.rimemba.data.repository.ItemChangeEffects
 import com.marcroldan.rimemba.domain.model.Item
 

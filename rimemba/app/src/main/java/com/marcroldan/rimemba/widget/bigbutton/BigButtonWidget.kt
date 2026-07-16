@@ -1,6 +1,7 @@
 package com.marcroldan.rimemba.widget.bigbutton
 
 import android.content.Context
+import android.content.Intent
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
@@ -8,6 +9,7 @@ import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -28,7 +30,7 @@ class BigButtonWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .fillMaxSize()
                     .background(RimembaPrimary)
-                    .clickable(actionStartActivity<QuickCaptureActivity>()),
+                    .clickable(actionStartActivity(Intent(context, QuickCaptureActivity::class.java))),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
