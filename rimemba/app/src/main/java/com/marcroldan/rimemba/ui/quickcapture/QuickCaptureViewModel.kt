@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.marcroldan.rimemba.core.Constants
 import com.marcroldan.rimemba.core.TimeProvider
+import com.marcroldan.rimemba.domain.model.TipoItem
 import com.marcroldan.rimemba.domain.usecase.CaptureVoiceItemUseCase
 import com.marcroldan.rimemba.voice.SpeechRecognitionController
 import com.marcroldan.rimemba.voice.TextToSpeechController
@@ -42,8 +43,12 @@ class QuickCaptureViewModel(
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState
 
-    private val _finishEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val finishEvent: SharedFlow<Unit> = _finishEvent
+    /** [requierePermisoNotificaciones] indica si hay que pedir POST_NOTIFICATIONS
+     * antes de cerrar la actividad (se acaba de crear un recordatorio). */
+    data class FinishEvent(val requierePermisoNotificaciones: Boolean)
+
+    private val _finishEvent = MutableSharedFlow<FinishEvent>(extraBufferCapacity = 1)
+    val finishEvent: SharedFlow<FinishEvent> = _finishEvent
 
     private var safetyJob: Job? = null
     private var yaProcesado = false
@@ -61,7 +66,7 @@ class QuickCaptureViewModel(
                         if (!yaProcesado) {
                             yaProcesado = true
                             _uiState.value = UiState.Error(estado.mensaje)
-                            terminar()
+                            terminar(requierePermisoNotificaciones = false)
                         }
                     }
                     SpeechRecognitionController.State.Idle -> Unit
@@ -82,7 +87,7 @@ class QuickCaptureViewModel(
             _uiState.value = UiState.Speaking
             ttsController.speak(mensaje)
             _uiState.value = UiState.Done
-            terminar()
+            terminar(requierePermisoNotificaciones = item.tipo == TipoItem.RECORDATORIO)
         }
     }
 
@@ -92,13 +97,13 @@ class QuickCaptureViewModel(
             if (!yaProcesado) {
                 yaProcesado = true
                 speechController.stopListening()
-                terminar()
+                terminar(requierePermisoNotificaciones = false)
             }
         }
     }
 
-    private fun terminar() {
-        _finishEvent.tryEmit(Unit)
+    private fun terminar(requierePermisoNotificaciones: Boolean) {
+        _finishEvent.tryEmit(FinishEvent(requierePermisoNotificaciones))
     }
 
     override fun onCleared() {

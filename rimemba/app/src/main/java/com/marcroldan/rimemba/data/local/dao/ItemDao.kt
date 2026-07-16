@@ -36,8 +36,13 @@ interface ItemDao {
     @Query(
         """
         SELECT * FROM items
-        WHERE fechaHora BETWEEN :inicio AND :fin
-        ORDER BY completado ASC, fechaHora ASC
+        WHERE (fechaHora BETWEEN :inicio AND :fin)
+           OR (fechaHora IS NULL AND creadoEn BETWEEN :inicio AND :fin)
+        ORDER BY
+            completado ASC,
+            fechaHora IS NULL ASC,
+            fechaHora ASC,
+            creadoEn DESC
         """
     )
     fun observeToday(inicio: String, fin: String): Flow<List<ItemEntity>>

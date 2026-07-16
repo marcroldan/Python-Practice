@@ -106,6 +106,24 @@ class ItemDaoTest {
     }
 
     @Test
+    fun observeTodayIncluyeNotasCreadasHoySinFechaHora() = runTest {
+        val hoy = LocalDateTime.of(2026, 7, 16, 10, 0)
+        val ayer = hoy.minusDays(1)
+        dao.insert(nota("Nota de hoy", hoy))
+        dao.insert(nota("Nota de ayer", ayer))
+        dao.insert(recordatorio("Recordatorio de hoy", hoy.plusHours(1), hoy))
+
+        val inicio = hoy.toLocalDate().atStartOfDay().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val fin = hoy.toLocalDate().atTime(23, 59, 59).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+
+        val lista = dao.observeToday(inicio, fin).first()
+
+        assertEquals(2, lista.size)
+        assertTrue(lista.any { it.texto == "Nota de hoy" })
+        assertTrue(lista.none { it.texto == "Nota de ayer" })
+    }
+
+    @Test
     fun setCompletadoActualizaSoloEseCampo() = runTest {
         val ahora = LocalDateTime.of(2026, 7, 16, 10, 0)
         val id = dao.insert(nota("Comprar leche", ahora))

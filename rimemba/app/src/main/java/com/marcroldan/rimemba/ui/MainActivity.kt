@@ -2,6 +2,7 @@ package com.marcroldan.rimemba.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -39,6 +40,7 @@ import androidx.core.content.ContextCompat
 import com.marcroldan.rimemba.R
 import com.marcroldan.rimemba.RimembaApplication
 import com.marcroldan.rimemba.core.TimeProvider
+import com.marcroldan.rimemba.domain.model.TipoItem
 import com.marcroldan.rimemba.domain.usecase.CaptureVoiceItemUseCase
 import com.marcroldan.rimemba.ui.list.ItemListScreen
 import com.marcroldan.rimemba.ui.list.ItemListViewModel
@@ -113,6 +115,14 @@ private fun VoiceCaptureSection(
         }
     }
 
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (!concedido) {
+            Toast.makeText(context, context.getString(R.string.permission_notifications_denied), Toast.LENGTH_LONG).show()
+        }
+    }
+
     fun iniciarEscucha() {
         val tienePermiso = ContextCompat.checkSelfPermission(
             context, Manifest.permission.RECORD_AUDIO
@@ -125,10 +135,24 @@ private fun VoiceCaptureSection(
         }
     }
 
+    fun asegurarPermisoDeNotificaciones() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val concedido = ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!concedido) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
     LaunchedEffect(estado) {
         val resultado = estado
         if (resultado is SpeechRecognitionController.State.Result) {
             val item = captureVoiceItemUseCase(resultado.texto)
+            if (item.tipo == TipoItem.RECORDATORIO) {
+                asegurarPermisoDeNotificaciones()
+            }
             val mensaje = captureVoiceItemUseCase.buildConfirmationMessage(item, timeProvider.now())
             ttsController.speak(mensaje)
             speechController.resetToIdle()

@@ -2,6 +2,7 @@ package com.marcroldan.rimemba.ui.quickcapture
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -59,6 +60,13 @@ class QuickCaptureActivity : ComponentActivity() {
         }
     }
 
+    // Pide POST_NOTIFICATIONS (si hace falta) antes de cerrar la actividad, para
+    // que un recordatorio creado desde el widget no se quede sin notificación
+    // silenciosamente en la primera ejecución (Android 13+ lo deniega por defecto).
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { finish() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,7 +93,18 @@ class QuickCaptureActivity : ComponentActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.finishEvent.collect { finish() }
+            viewModel.finishEvent.collect { evento ->
+                val hayQuePedirPermiso = evento.requierePermisoNotificaciones &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    ContextCompat.checkSelfPermission(this@QuickCaptureActivity, Manifest.permission.POST_NOTIFICATIONS) !=
+                    PackageManager.PERMISSION_GRANTED
+
+                if (hayQuePedirPermiso) {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    finish()
+                }
+            }
         }
 
         val tienePermiso = ContextCompat.checkSelfPermission(

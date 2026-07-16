@@ -34,7 +34,11 @@ class AppContainer(context: Context) {
      */
     private val itemChangeEffects = CompositeItemChangeEffects(
         listOf(
-            ReminderChangeEffects(alarmScheduler, notificationHelper),
+            // El lambda evita un ciclo de construcción: itemRepository (lazy)
+            // necesita itemChangeEffects, así que estos efectos no pueden recibir
+            // itemRepository directamente en el constructor, solo una referencia
+            // diferida que se resuelve la primera vez que se invoca.
+            ReminderChangeEffects(alarmScheduler, notificationHelper) { id -> itemRepository.getById(id) },
             WidgetRefreshEffects(context)
         )
     )
