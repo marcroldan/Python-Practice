@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rimemba</string>
+
+    <string name="big_button_widget_description">Botón grande para anotar por voz</string>
+    <string name="daily_summary_widget_description">Resumen de hoy</string>
+
+    <string name="mic_button_content_description">Mantén pulsado para grabar una nota o recordatorio por voz</string>
+    <string name="mic_button_idle">Toca para hablar</string>
+    <string name="mic_button_listening">Escuchando…</string>
+    <string name="mic_button_processing">Procesando…</string>
+
+    <string name="notification_channel_reminders_name">Recordatorios</string>
+    <string name="notification_channel_reminders_description">Avisos de tus recordatorios anotados por voz</string>
+
+    <string name="notification_action_complete">Completar</string>
+    <string name="notification_action_snooze">Posponer</string>
+    <string name="notification_snooze_hint">¿Cuándo te lo recuerdo?</string>
+    <string name="notification_snooze_option_one_hour">Una hora</string>
+    <string name="notification_snooze_option_this_afternoon">Esta tarde</string>
+    <string name="notification_snooze_option_tomorrow">Mañana</string>
+
+    <string name="list_empty_state">Todavía no tienes notas ni recordatorios.\nToca el botón para anotar el primero por voz.</string>
+    <string name="list_delete_confirm_title">¿Borrar este elemento?</string>
+    <string name="list_delete_confirm_message">Esta acción no se puede deshacer.</string>
+    <string name="action_delete">Borrar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="mark_completed_content_description">Marcar como completado</string>
+    <string name="delete_item_content_description">Borrar elemento</string>
+
+    <string name="permission_record_audio_denied">Necesito acceso al micrófono para anotar por voz.</string>
+    <string name="permission_notifications_denied">Sin permiso de notificaciones no podré avisarte de tus recordatorios.</string>
+</resources>
