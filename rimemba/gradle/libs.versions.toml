@@ -3,7 +3,10 @@
 # (este entorno de desarrollo no tiene acceso a maven.google.com para comprobarlo en vivo).
 agp = "8.10.1"
 kotlin = "2.4.10"
-ksp = "2.4.10-1.0.29"
+# KSP2 dejó de usar el esquema "<versionKotlin>-<parcheKsp>" a partir de la 2.3.0:
+# ya no es un plugin de compilador con dependencia estricta de la versión de Kotlin,
+# así que ahora se versiona de forma independiente (ver github.com/google/ksp docs/ksp2.md).
+ksp = "2.3.10"
 coreKtx = "1.15.0"
 lifecycle = "2.9.0"
 activityCompose = "1.10.0"
