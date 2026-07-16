@@ -1,0 +1,68 @@
+name: Build Rimemba APK
+
+on:
+  push:
+    branches:
+      - main
+      - claude/android-voice-reminder-app-pgkrut
+    paths:
+      - "rimemba/**"
+      - ".github/workflows/build-rimemba-apk.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rimemba
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
+
+      - name: Run unit tests
+        run: ./gradlew test --stacktrace
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Locate APK
+        id: apk
+        run: echo "path=$(find app/build/outputs/apk/debug -name '*.apk' | head -n1)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload APK as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rimemba-debug-apk
+          path: rimemba/${{ steps.apk.outputs.path }}
+
+      - name: Publish/update "latest debug build" release
+        if: github.event_name != 'pull_request'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: latest-debug
+          name: "Rimemba - último build de depuración"
+          body: |
+            APK de depuración generado automáticamente desde el commit ${{ github.sha }}.
+            Este release se actualiza en cada push — no es una versión estable.
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          removeArtifacts: true
+          artifacts: rimemba/${{ steps.apk.outputs.path }}
+          token: ${{ secrets.GITHUB_TOKEN }}
